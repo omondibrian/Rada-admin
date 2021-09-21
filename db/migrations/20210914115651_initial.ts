@@ -77,8 +77,7 @@ export async function up(knex: Knex): Promise<void> {
       TableNames.User,
       (table: Knex.CreateTableBuilder) => {
         table.increments("_id").notNullable().primary();
-        table.string("name").notNullable();
-        table.string("regNo").notNullable();
+        table.string("name").notNullable(); 
         table.string("email").unique().notNullable();
         table.string("password").notNullable();
         table.string("profilePic").notNullable();
@@ -88,19 +87,53 @@ export async function up(knex: Knex): Promise<void> {
         table.string("status").notNullable();
         table.string("account_status").notNullable();
         table.string("synced").notNullable().defaultTo("online");
-        table.date("joined").notNullable();
-        createRef(table, TableNames.Campuses);
+        table.string("joined").notNullable();
         addDefaultColumns(table);
       }
+      ),
+      // AdminUsers table - stores info about the current admins
+      await knex.schema.createTable(
+        TableNames.Admin_Users,
+        (table: Knex.CreateTableBuilder) => {
+          table.increments("_id").notNullable().primary();
+          createRef(table, `${TableNames.User}`);
+          createRef(table, `${TableNames.Roles}`);
+          addDefaultColumns(table);
+        }
+        ),
+        // Student table - stores info about the students
+        await knex.schema.createTable(
+          TableNames.Student,
+          (table: Knex.CreateTableBuilder) => {
+            table.increments("_id").notNullable().primary();
+            table.string("regNo").notNullable();
+            createRef(table, `${TableNames.User}`);
+            createRef(table, TableNames.Campuses);
+            addDefaultColumns(table);
+      }
     ),
-    // AdminUsers table - stores info about the current admins
+    // Counsellors table - stores info about the current counsellors
     await knex.schema.createTable(
-      TableNames.Admin_Users,
+      TableNames.Counselor,
       (table: Knex.CreateTableBuilder) => {
         table.increments("_id").notNullable().primary();
-        createRef(table, `${TableNames.User}`),
-          createRef(table, `${TableNames.Roles}`),
+        table.string('expertise').notNullable();
+        table.jsonb('Schedule').notNullable();
+        createRef(table, `${TableNames.User}`).unique();
+        createRef(table, TableNames.Campuses);
           addDefaultColumns(table);
+      }
+    ),
+    // PeerCounsellor table - stores info about the current peerCounsellors
+    await knex.schema.createTable(
+      TableNames.peerCounselor,
+      (table: Knex.CreateTableBuilder) => {
+        table.increments("_id").notNullable().primary();
+        table.string('expertise').notNullable()
+        createRef(table, `${TableNames.User}`),
+        createRef(table, `${TableNames.Student}`),
+        createRef(table, TableNames.Campuses);
+        addDefaultColumns(table);
       }
     ),
     // Mentor table - stores all the available mentorships in the institution
@@ -120,19 +153,19 @@ export async function up(knex: Knex): Promise<void> {
         table.increments("_id").notNullable().primary();
         createRef(table, `${TableNames.Mentorship}`);
         table
-        .integer('mentor_id')
-        .unsigned()
-        .references("_id")
-        .inTable(TableNames.User)
-        .notNullable()
-        .onDelete("cascade");
+          .integer("mentor_id")
+          .unsigned()
+          .references("_id")
+          .inTable(TableNames.User)
+          .notNullable()
+          .onDelete("cascade");
         table
-        .integer('mentee_id')
-        .unsigned()
-        .references("_id")
-        .inTable(TableNames.User)
-        .notNullable()
-        .onDelete("cascade");
+          .integer("mentee_id")
+          .unsigned()
+          .references("_id")
+          .inTable(TableNames.User)
+          .notNullable()
+          .onDelete("cascade");
         addDefaultColumns(table);
       }
     ),

@@ -52,7 +52,7 @@ export async function seed(knex: Knex): Promise<void> {
     .where("name", "=", "Njoro");
   const newUser: IUser = {
     name: "test",
-    regNo: "S13/12345/11",
+    // regNo: "S13/12345/11",
     email: "testUser@test.com",
     password: "test",
     profilePic: "./updatedPic.jpg",
@@ -63,7 +63,7 @@ export async function seed(knex: Knex): Promise<void> {
     account_status: "active",
     synced: "true",
     joined: "12/01/1234",
-    Campuses_id: campusId[0]._id.toString(),
+    // Campuses_id: campusId[0]._id,
   };
   // Inserts seed entry
   await knex(TableNames.User).insert(newUser);

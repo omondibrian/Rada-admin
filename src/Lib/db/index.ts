@@ -14,7 +14,7 @@
  };
  
  const createRef = (table: Knex.CreateTableBuilder, foreignTable: string) => {
-   table
+  return table
      .integer(`${foreignTable}_id`)
      .unsigned()
      .references("_id")

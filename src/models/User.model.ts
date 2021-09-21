@@ -22,7 +22,7 @@ export default class User extends Model {
   public dob!: string;
   public phone!: string;
   public status!: string;
-  public Campuses_id!: string;
+  public Campuses_id!: number;
   public account_status!: string;
   public synced!: string;
   public joined!: string;
@@ -59,7 +59,7 @@ export default class User extends Model {
 export interface IUser {
   _id?: number;
   name: string;
-  regNo: string;
+  // regNo: string;
   email: string;
   password: string;
   profilePic: string;
@@ -67,7 +67,7 @@ export interface IUser {
   dob: string;
   phone: string;
   status: string;
-  Campuses_id: string;
+  // Campuses_id: number;
   account_status: string;
   synced: string;
   joined: string;

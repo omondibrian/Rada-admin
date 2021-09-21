@@ -23,10 +23,13 @@ export default class TableNames {
   static Map_Locations = "Map_Locations";
   static Groups = "Groups";
   static Sub_Sub_Categotries = "Sub_Sub_Categotries";
-  static access_logs = "access_logs";
+  static Student = 'Student';
+  static Counselor = 'Counselor';
+  static peerCounselor = 'peerCounselor';
+  // static access_logs = "access_logs";
   static Data_types = "Data_types";
   static Contents = "Contents";
-  static Activity_logs = "Activity_logs";
+  // static Activity_logs = "Activity_logs";
   static News = "News";
   static NewsCategories = "NewsCategories";
 }
@@ -41,6 +44,9 @@ export const orderedTables = [
   TableNames.Mentorship,
   TableNames.Contents,
   TableNames.Admin_Users,
+  TableNames.Counselor,
+  TableNames.peerCounselor,
+  TableNames.Student,
   TableNames.help,
   TableNames.User,
   TableNames.eventLogs,
@@ -52,8 +58,8 @@ export const orderedTables = [
   TableNames.Groups,
   TableNames.Map_Locations,
   TableNames.Contacts,
-  TableNames.access_logs,
-  TableNames.Activity_logs,
+  // TableNames.access_logs,
+  // TableNames.Activity_logs,
   TableNames.Data_types,
   TableNames.Issue_categories,
   TableNames.faculties,
