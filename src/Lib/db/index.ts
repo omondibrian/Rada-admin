@@ -1,5 +1,5 @@
 /**
- * @fileOverview contains the various functions to manage the users route.
+ * @fileOverview contains the various helper functions  for database operation.
  * @author Brian Omondi
  * @version 1.0.0
  * This source code is licensed under the MIT license found in the

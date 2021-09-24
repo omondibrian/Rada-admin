@@ -6,7 +6,6 @@ import User from '@Models/User.model';
 import Objection, { Model } from "objection";
 import TableNames from "@Rada/src/Lib/constants";
 import University from '@Models/University.model';
-import { ITimestamps } from '@Rada/src/Lib/constants/types';
 
 
 const env = process.env.NODE_ENV as string || "development";
@@ -49,8 +48,9 @@ export default class Campus extends Model   {
     }
   };
 
-  export interface ICampus  extends ITimestamps{
-    _id: number;
+  export interface ICampus  {
+    _id?: number;
     name: string;
+    university?:string;
     University_id: string;
   }

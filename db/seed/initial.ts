@@ -41,15 +41,12 @@ export async function seed(knex: Knex): Promise<void> {
   const uni = await knex<IUniversity>(TableNames.University)
     .select("*")
     .where("name", "=", "university");
-  // // create a new campus
+  // create a new campus
   await knex<ICampus>(TableNames.Campuses).insert({
     name: "Njoro",
-    University_id: uni[0]._id.toString(),
+    University_id: uni[0]?._id?.toString() as string,
   });
 
-  const campusId = await knex<ICampus>(TableNames.Campuses)
-    .select("*")
-    .where("name", "=", "Njoro");
   const newUser: IUser = {
     name: "test",
     // regNo: "S13/12345/11",
@@ -66,5 +63,30 @@ export async function seed(knex: Knex): Promise<void> {
     // Campuses_id: campusId[0]._id,
   };
   // Inserts seed entry
-  await knex(TableNames.User).insert(newUser);
+  const [user] = await knex(TableNames.User).insert(newUser, ["_id"]);
+  await knex(TableNames.Admin_Users).insert({
+    Roles_id: roleId[0]._id,
+    User_id: user._id,
+  });
+
+  //create category
+  const [category] = await knex(TableNames.Categories).insert(
+    {
+      name: "TestCategory",
+    },
+    ["_id"]
+  );
+
+  await knex(TableNames.Sub_Categories).insert({
+    name: "test Sub Category",
+    Categories_id: category._id,
+  });
+
+  await knex(TableNames.Data_types).insert({
+    type: "test ",
+  });
+
+  await knex(TableNames.NewsCategories).insert({
+    name: "newsTest",
+  });
 }

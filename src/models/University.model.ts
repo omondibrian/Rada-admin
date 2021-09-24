@@ -50,7 +50,8 @@ export default class University extends Model   {
   };
 
   export interface IUniversity {
-    _id: number;
+    _id?: number;
     name: string;
     Country_id: string;
+    country?:string;
   }

@@ -44,17 +44,7 @@ describe("UserRepository", () => {
     gender: "male",
   };
 
-  const studentData = {
-    regNo: "S13/12345/11",
-    User_id: userId?.toString() as string,
-    Campuses_id: 1,
-  };
 
-  const peerCounsellorData = {
-    expertise: "HIV/AIDS",
-    User_id: userId?.toString() as string,
-    Campuses_id: 1,
-  };
 
   afterAll(async () => {
     await User.query().delete().where("name", "=", updatedData.name);

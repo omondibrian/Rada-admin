@@ -1,20 +1,20 @@
-import Knex from "knex";
+/**
+ * @fileOverview contains the various functions to manage the user's data.
+ * @author Brian Omondi
+ * @version 1.0.0
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
 import TableNames from "../Lib/constants";
 import { IUser } from "@Models/User.model";
 import { IStudent } from "@Models/Student.model";
 import { IAdminUser } from "@Models/AdminUser.model";
 import { ICounsellor, ISchedule } from "@Models/counsellor.model";
 import { IPeerCounsellor } from "@Models/peerCounsellor.model";
-const config: Knex.Config = {
-  client: "pg",
-  connection: {
-    port: process.env.POSTGRES_PORT as unknown as number,
-    database: process.env.POSTGRES_DB,
-    user: process.env.POSTGRES_USER,
-    password: process.env.POSTGRES_PASSWORD,
-  },
-};
-const knexConn = Knex(config);
+import {DataBaseConnection} from "../Lib/db/connection";
+
+const knexConn = new DataBaseConnection().getConnection();
 export interface CounsellorData extends IUser, ICounsellor {}
 export interface PeerCounsellorData extends IUser, IPeerCounsellor, IStudent {}
 export type IAnalytics = {
