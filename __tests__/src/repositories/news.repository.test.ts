@@ -15,6 +15,7 @@ describe("NewsRepository", () => {
     Admin_Users_id: "",
     NewsCategories_id: "",
     status: "sent",
+    University_id:'1'
   };
   const conn = Knex({
     client: "pg",
@@ -48,7 +49,7 @@ describe("NewsRepository", () => {
   });
   describe("NewsRepository - fetchNews", () => {
     it("should retrive a list of all available news", async () => {
-      const result = await repository.fetchNews();
+      const result = await repository.fetchNews('1');
       expect(result.length).toBeGreaterThan(0);
     });
   });

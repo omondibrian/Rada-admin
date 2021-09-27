@@ -67,6 +67,13 @@ describe("University Repository ", () => {
       expect(campuses.length).toBeGreaterThan(0);
     });
   });
+  describe('University Repository - fetchNoUniversityRegistered', () => {
+    it('should return the number of registered institutions',async()=>{
+      const result = await repository.fetchNoUniversityRegistered();
+      expect(result).toBeGreaterThan(0);
+    })
+  })
+  
   describe("Univerity Repository - removeFaculty", () => {
     it("should remove the specified faculty", async () => {
       const deletedFaculty = await repository.removeFaculty(fId.toString());

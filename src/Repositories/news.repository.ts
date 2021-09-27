@@ -11,7 +11,7 @@ import { DataBaseConnection } from "../Lib/db/connection";
 
 export interface INewsRepository {
   createNews(news: Inews): Promise<Inews>;
-  fetchNews(): Promise<Array<Inews>>;
+  fetchNews(universityId:string): Promise<Array<Inews>>;
   deleteNews(id:string): Promise<Inews>;
 }
 
@@ -23,6 +23,7 @@ export interface Inews {
   NewsCategories_id: string;
   Admin_Users_id: string;
   status: string;
+  University_id:string
 }
 
 export class NewsRepository implements INewsRepository {
@@ -34,6 +35,7 @@ export class NewsRepository implements INewsRepository {
     "image",
     "NewsCategories_id",
     "Admin_Users_id",
+    "University_id",
     "status",
   ];
   private returnNewsPayload(result: any): Inews {
@@ -45,6 +47,7 @@ export class NewsRepository implements INewsRepository {
       NewsCategories_id: result.NewsCategories_id.toString(),
       Admin_Users_id: result.Admin_Users_id.toString(),
       status: result.status,
+      University_id:result.University_id.toString()
     };
   }
   async createNews(news: Inews): Promise<Inews> {
@@ -55,10 +58,10 @@ export class NewsRepository implements INewsRepository {
     return this.returnNewsPayload(result);
   }
 
-  async fetchNews(): Promise<Array<Inews>> {
+  async fetchNews(universityId:string): Promise<Array<Inews>> {
     const result = await this.knexConn<Inews>(TableNames.News).select(
       ...this.returnData
-    );
+    ).where('University_id','=',universityId);
     return result.map((news) => this.returnNewsPayload(news));
   }
  async deleteNews(id:string): Promise<Inews> {

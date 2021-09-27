@@ -357,6 +357,7 @@ export async function up(knex: Knex): Promise<void> {
         createRef(table, `${TableNames.Data_types}`);
         createRef(table, `${TableNames.Sub_Categories}`);
         createRef(table, `${TableNames.Admin_Users}`);
+        createRef(table, `${TableNames.University}`);
         addDefaultColumns(table);
       }
     ),
@@ -379,6 +380,7 @@ export async function up(knex: Knex): Promise<void> {
         table.string("image").notNullable();
         createRef(table, `${TableNames.NewsCategories}`);
         createRef(table, `${TableNames.Admin_Users}`);
+        createRef(table, `${TableNames.University}`);
         table.string("status").notNullable();
         addDefaultColumns(table);
       }

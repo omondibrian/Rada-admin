@@ -16,6 +16,7 @@ export interface IUniversityRepository {
   addUniversity(data: IUniversity): Promise<IUniversity>;
   addCampus(data: ICampus): Promise<ICampus>;
   addFaculty(data: IFaculty): Promise<IFaculty>;
+  fetchNoUniversityRegistered(): Promise<number>;
   fetchFaculty(universityId: string): Promise<Array<IFaculty>>;
   fetchCampus(universityId: string): Promise<Array<ICampus>>;
   removeUniversityOrCampus(
@@ -53,6 +54,12 @@ export class UniversityRepository implements IUniversityRepository {
       university: result.university,
       University_id: result.University_id.toString(),
     };
+  }
+  async fetchNoUniversityRegistered(): Promise<number> {
+    const university = await this.knexConn<IUniversity>(
+      TableNames.University
+    ).count("_id");
+    return parseInt(university.pop()!.count.toString())
   }
 
   private facultyPayload(result: any): IFaculty {
@@ -124,7 +131,9 @@ export class UniversityRepository implements IUniversityRepository {
         .delete(this.campusReturnPayload);
       return this.campusPayload(campus);
     } else {
-      const [univeristy] = await this.knexConn<IUniversity>(TableNames.University)
+      const [univeristy] = await this.knexConn<IUniversity>(
+        TableNames.University
+      )
         .where("_id", "=", id)
         .returning(this.campusReturnPayload)
         .delete(this.universityReturnPayload);

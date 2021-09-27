@@ -20,6 +20,7 @@ describe("Content Repository", () => {
     Data_types_id: "1",
     Admin_Users_id: "1",
     Sub_Categories_id: "1",
+    University_id: "1",
   };
 
   describe("Content Repository - createContent", () => {
@@ -43,7 +44,7 @@ describe("Content Repository", () => {
   let contentId = 0;
   describe("Content Repository - fetchContents ", () => {
     it("should successfully retrive all available content", async () => {
-      const result = await repository.fetchContents();
+      const result = await repository.fetchContents("1");
       contentId = parseInt(result[0]._id as string);
       expect(result.length).toBeGreaterThan(0);
     });
@@ -67,6 +68,7 @@ describe("Content Repository", () => {
     Data_types_id: "1",
     Admin_Users_id: testContent.Admin_Users_id,
     Sub_Categories_id: testContent.Sub_Categories_id,
+    University_id: "1",
   };
   describe("Content Repository - EditContent", () => {
     it("should update specific content with the passed data", async () => {

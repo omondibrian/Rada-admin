@@ -163,7 +163,7 @@ describe("UserRepository", () => {
         },
       },
     ];
-    it("should sucessfully update counnsellor Schedule", async () => {
+    it("should sucessfully update counsellor Schedule", async () => {
       const result = await repository.updateCounsellorSchedule(
         schedule,
         userId.toString()

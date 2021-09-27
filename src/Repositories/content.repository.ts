@@ -15,7 +15,7 @@ const knexConn = new DataBaseConnection().getConnection();
 
 export interface IContentRepository {
   createContent(data: IContent): Promise<IContent>;
-  fetchContents(): Promise<Array<IContent>>;
+  fetchContents(universityId: string): Promise<Array<IContent>>;
   fetchContent(id: string): Promise<IContent>;
   EditContent(id: string, data: IContent): Promise<IContent>;
   DeleteContent(id: string): Promise<IContent>;
@@ -28,6 +28,7 @@ export interface IContent {
   Data_types_id: string;
   Sub_Categories_id: string;
   Admin_Users_id: string;
+  University_id: string;
 }
 
 const returnDAta = [
@@ -37,6 +38,7 @@ const returnDAta = [
   "Data_types_id",
   "Sub_Categories_id",
   "Admin_Users_id",
+  "University_id",
 ];
 
 export class ContentRepository implements IContentRepository {
@@ -48,6 +50,7 @@ export class ContentRepository implements IContentRepository {
       Data_types_id: result.Data_types_id.toString(),
       Sub_Categories_id: result.Sub_Categories_id.toString(),
       Admin_Users_id: result.Admin_Users_id.toString(),
+      University_id: result.University_id.toString(),
     };
   }
   async createContent(data: IContent): Promise<IContent> {
@@ -58,10 +61,10 @@ export class ContentRepository implements IContentRepository {
     return this.returnContentPayload(result);
   }
 
-  async fetchContents(): Promise<IContent[]> {
-    const results = await knexConn<IContent>(TableNames.Contents).select(
-      ...returnDAta
-    );
+  async fetchContents(universityId: string): Promise<IContent[]> {
+    const results = await knexConn<IContent>(TableNames.Contents)
+      .select(...returnDAta)
+      .where("University_id", "=", universityId);
     const result = results.map((result) => this.returnContentPayload(result));
     return result;
   }
