@@ -88,6 +88,7 @@ export async function up(knex: Knex): Promise<void> {
         table.string("account_status").notNullable();
         table.string("synced").notNullable().defaultTo("online");
         table.string("joined").notNullable();
+        createRef(table, `${TableNames.University}`);
         addDefaultColumns(table);
       }
     ),
@@ -95,11 +96,14 @@ export async function up(knex: Knex): Promise<void> {
     await knex.schema.createTable(
       TableNames.Admin_Users,
       (table: Knex.CreateTableBuilder) => {
-        table.increments("_id").notNullable().primary();
+        table.specificType("_id", "serial").unique();
         createRef(table, `${TableNames.User}`);
         createRef(table, `${TableNames.Roles}`);
-        addDefaultColumns(table);
-      }
+        table.primary([
+          `${TableNames.User}_id`,
+          `${TableNames.Roles}_id`,
+        ]);
+       }
     ),
     // Student table - stores info about the students
     await knex.schema.createTable(
@@ -118,7 +122,9 @@ export async function up(knex: Knex): Promise<void> {
       (table: Knex.CreateTableBuilder) => {
         table.increments("_id").notNullable().primary();
         table.string("expertise").notNullable();
-        table.jsonb("Schedule").notNullable();
+        table.integer("total_rating").nullable().defaultTo(0);
+        table.integer("total_No_user_rated").nullable().defaultTo(0);
+        table.json("Schedule").notNullable();
         createRef(table, `${TableNames.User}`).unique();
         createRef(table, TableNames.Campuses);
         addDefaultColumns(table);

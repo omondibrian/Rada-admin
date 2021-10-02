@@ -10,7 +10,7 @@ services:
       POSTGRES_USER: dev
       POSTGRES_DB: rada
     ports:
-      - 5437:5432
+      - 5432:5432
   adminer:
     depends_on:
       - db

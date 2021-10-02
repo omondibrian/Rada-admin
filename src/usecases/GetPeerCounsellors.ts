@@ -7,14 +7,14 @@ export class GetPeerCounsellors {
       private readonly config: any
     ) {}
     async fetch(
-      
+      id:string
     ): Promise<
       | ResultPayload<Array<PeerCounsellorData>>
       | ResultPayload<Error>
       | undefined
     > {
       try {
-        const result = await this.repo.getPeerCounsellors();
+        const result = await this.repo.getPeerCounsellors(id);
         return new ResultPayload<Array<PeerCounsellorData>>(
           result,
           200

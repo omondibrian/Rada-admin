@@ -28,11 +28,11 @@ describe("University Repository ", () => {
 
   describe("Univerity Repository - addCampus", () => {
     it("should successfully add new campus for a particular univerity", async () => {
+      
       const campus: ICampus = {
         name: "testCampus",
         University_id: uniId.toString(),
       };
-
       const result = await repository.addCampus(campus);
       campusId = result._id as number;
       expect(result.name).toEqual(campus.name);
@@ -53,11 +53,10 @@ describe("University Repository ", () => {
       expect(result.University_id).toEqual(faculty.University_id);
     });
   });
-
-  describe("University Repository - fetchFaculty", () => {
-    it("should return a list of all available faculties in a specific univerity", async () => {
-      const result = await repository.fetchFaculty(uniId + "");
-      expect(result.length).toBeGreaterThan(0);
+  describe("University Repository - fetchUniversity", () => {
+    it("should retrive the university details requested", async () => {
+      const university = await repository.fetchUniversity(testUniData.name);
+      expect(university.name).toEqual(testUniData.name);
     });
   });
 
@@ -67,12 +66,30 @@ describe("University Repository ", () => {
       expect(campuses.length).toBeGreaterThan(0);
     });
   });
+
+  describe("University Repository - fetchFaculty", () => {
+    it("should retrive all available faculties for the requested institution", async () => {
+      const faculty = await repository.fetchFaculty(uniId.toString());
+      expect(faculty.length).toBeGreaterThan(0);
+    });
+  });
   describe('University Repository - fetchNoUniversityRegistered', () => {
     it('should return the number of registered institutions',async()=>{
       const result = await repository.fetchNoUniversityRegistered();
       expect(result).toBeGreaterThan(0);
     })
   })
+
+  describe("University Repository - fetchCampusByName", () => {
+    const campus: ICampus = {
+      name: "testCampus",
+      University_id: uniId.toString(),
+    };
+    it("should retrive the requested campus details", async () => {
+      const result = await repository.fetchCampusByName(campus.name);
+      expect(result.name).toEqual(campus.name);
+    });
+  });
   
   describe("Univerity Repository - removeFaculty", () => {
     it("should remove the specified faculty", async () => {

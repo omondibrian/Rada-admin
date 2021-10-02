@@ -38,6 +38,7 @@ describe("EditProfile - Usecase", () => {
     account_status: "active",
     synced: "true",
     joined: "12/01/1234",
+    University_id:'1'
   };
   const newUserProfile: IUser = {
     name: "Updatedtest",
@@ -51,6 +52,7 @@ describe("EditProfile - Usecase", () => {
     dob: "31-12-2024",
     synced: "true",
     gender: "male",
+    University_id:'1'
   };
   const userId = "1";
   it("should successfully Edit User Profile password changed", async () => {

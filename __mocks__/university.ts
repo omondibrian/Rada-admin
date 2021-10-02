@@ -3,6 +3,12 @@ import { IUniversity } from "@Rada/src/models/University.model";
 import { IFaculty, IUniversityRepository } from "@Rada/src/Repositories/University.repository";
 
 export class MockedUniversityRepository implements IUniversityRepository{
+    fetchCampusByName(name: string): Promise<ICampus> {
+        throw new Error("Method not implemented.");
+    }
+    fetchUniversity(name: string): Promise<{ name: string; _id: string; }> {
+        throw new Error("Method not implemented.");
+    }
     fetchNoUniversityRegistered(): Promise<number> {
         throw new Error("Method not implemented.");
     }

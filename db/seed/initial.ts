@@ -60,6 +60,7 @@ export async function seed(knex: Knex): Promise<void> {
     account_status: "active",
     synced: "true",
     joined: "12/01/1234",
+    University_id: uni[0]?._id?.toString() as string,
     // Campuses_id: campusId[0]._id,
   };
   // Inserts seed entry

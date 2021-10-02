@@ -6,12 +6,12 @@ describe("Get Counsellors - Usecase", () => {
   const repo = new UserMockRepository();
   const config = jest.fn().mockReturnValue({ env: "development" });
   const usecase = new GetCounsellors(repo, config);
-
+  const universityId = '1';
   it("should successfully retrive all available counsellors", async () => {
     const mockFetchCounsellors = jest
       .spyOn(repo, "getCounsellors")
       .mockResolvedValue([]);
-    const result = await usecase.fetch();
+    const result = await usecase.fetch(universityId);
     expect(result).toBeDefined();
     expect(repo.getCounsellors).toHaveBeenCalledTimes(1);
     mockFetchCounsellors.mockClear();
@@ -23,7 +23,7 @@ describe("Get Counsellors - Usecase", () => {
         throw new Error("Error will Testing");
       });
     config.mockReturnValue({ env: "development" });
-    const result = (await usecase.fetch()) as ResultPayload<Error>;
+    const result = (await usecase.fetch(universityId)) as ResultPayload<Error>;
 
     const expectedSimulatedResults = new ResultPayload<Error>(
       new Error("Error will Testing"),
@@ -43,7 +43,7 @@ describe("Get Counsellors - Usecase", () => {
         throw new Error("Error will Testing");
       });
     config.mockReturnValue({ env: "production" });
-    const result = (await usecase.fetch()) as ResultPayload<Error>;
+    const result = (await usecase.fetch(universityId)) as ResultPayload<Error>;
 
     const expectedSimulatedResults = new ResultPayload<Error>(
       new Error("Unable to retrive current Counsellors.Please retry"),

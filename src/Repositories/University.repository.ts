@@ -17,8 +17,10 @@ export interface IUniversityRepository {
   addCampus(data: ICampus): Promise<ICampus>;
   addFaculty(data: IFaculty): Promise<IFaculty>;
   fetchNoUniversityRegistered(): Promise<number>;
+  fetchUniversity(name: string): Promise<{ name: string; _id: string }>;
   fetchFaculty(universityId: string): Promise<Array<IFaculty>>;
   fetchCampus(universityId: string): Promise<Array<ICampus>>;
+  fetchCampusByName(name: string): Promise<ICampus>
   removeUniversityOrCampus(
     id: string,
     isCampus: boolean
@@ -37,7 +39,7 @@ export class UniversityRepository implements IUniversityRepository {
   private campusReturnPayload = ["_id", "name", "University_id"];
   private facultyReturnPayload = ["_id", "name", "University_id"];
   private knexConn = new DataBaseConnection().getConnection();
-
+  
   private universityPayload(result: any): IUniversity {
     return {
       _id: result._id,
@@ -46,7 +48,7 @@ export class UniversityRepository implements IUniversityRepository {
       Country_id: result.Country_id.toString(),
     };
   }
-
+  
   private campusPayload(result: any): ICampus {
     return {
       _id: result._id,
@@ -55,11 +57,20 @@ export class UniversityRepository implements IUniversityRepository {
       University_id: result.University_id.toString(),
     };
   }
+  async fetchUniversity(name: string): Promise<{ name: string; _id: string }> {
+    const [university] = await this.knexConn<IUniversity>(TableNames.University)
+      .select("name", "_id")
+      .where("name", "=", name);
+    return {
+      _id: university._id!.toString() as string,
+      name: university.name, 
+    };
+  }
   async fetchNoUniversityRegistered(): Promise<number> {
     const university = await this.knexConn<IUniversity>(
       TableNames.University
     ).count("_id");
-    return parseInt(university.pop()!.count.toString())
+    return parseInt(university.pop()!.count.toString());
   }
 
   private facultyPayload(result: any): IFaculty {
@@ -111,7 +122,14 @@ export class UniversityRepository implements IUniversityRepository {
     const campuses = await this.knexConn<ICampus>(TableNames.Campuses)
       .select(...this.campusReturnPayload)
       .where("University_id", "=", universityId);
-    return campuses.map((faculty) => this.campusPayload(faculty));
+    return campuses.map((campus) => this.campusPayload(campus));
+  }
+
+  async fetchCampusByName(name: string): Promise<ICampus> {
+    const [campus] = await this.knexConn<ICampus>(TableNames.Campuses)
+      .select(...this.campusReturnPayload)
+      .where("name", "=", name);
+    return this.campusPayload(campus);
   }
   async removeFaculty(facultyId: string): Promise<IFaculty> {
     const [faculty] = await this.knexConn<IFaculty>(TableNames.faculties)

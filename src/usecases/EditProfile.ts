@@ -11,7 +11,7 @@ export class EditProfile {
   public async update(
     userId: string,
     user: Partial<IUser>
-  ): Promise<ResultPayload<IUser> | ResultPayload<Error> | undefined> {
+  ): Promise<ResultPayload<Partial<IUser>> | ResultPayload<Error> | undefined> {
     try {
       let encrptedPass = "";
       let userToUpdate: Partial<IUser>;
@@ -30,10 +30,10 @@ export class EditProfile {
           user as IUser
         );
       }
-      const result: IUser = {
+      const result: Partial<IUser> = {
+        _id: updates._id,
         name: updates.name,
         email: updates.email,
-        password: updates.password,
         profilePic: updates.profilePic,
         gender: updates.gender,
         phone: updates.phone,
@@ -43,7 +43,7 @@ export class EditProfile {
         synced: updates.synced,
         joined: updates.joined,
       };
-      return new ResultPayload<IUser>(result, 200);
+      return new ResultPayload<Partial<IUser>>(result, 200);
     } catch (error: any) {
       const msg =
         this.config().env !== "production"

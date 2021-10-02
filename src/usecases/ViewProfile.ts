@@ -10,13 +10,13 @@ export class ViewProfile {
 
   public async profile(
     userId: string
-  ): Promise<ResultPayload<IUser> | ResultPayload<Error> | undefined> {
+  ): Promise<ResultPayload<Partial<IUser>> | ResultPayload<Error> | undefined> {
     try {
       const profile = (await this.repo.findById(userId)) as IUser;
-      const user: IUser = {
+      const user: Partial<IUser> = {
+        _id: profile._id,
         name: profile.name,
         email: profile.email,
-        password: profile.password,
         profilePic: profile.profilePic,
         gender: profile.gender,
         phone: profile.phone,
@@ -27,7 +27,7 @@ export class ViewProfile {
         joined: profile.joined,
       };
 
-      const result = new ResultPayload<IUser>(user, 200);
+      const result = new ResultPayload<Partial<IUser>>(user, 200);
       return result;
     } catch (error: any) {
       const msg =

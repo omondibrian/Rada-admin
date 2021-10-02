@@ -6,8 +6,9 @@
  * LICENSE file in the root directory of this source tree.
  */
 
+import { config } from "dotenv";
 import Knex from "knex";
-
+config();
 export class DataBaseConnection {
   config: Knex.Config = {
     client: "pg",

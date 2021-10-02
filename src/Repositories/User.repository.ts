@@ -12,10 +12,14 @@ import { IStudent } from "@Models/Student.model";
 import { IAdminUser } from "@Models/AdminUser.model";
 import { ICounsellor, ISchedule } from "@Models/counsellor.model";
 import { IPeerCounsellor } from "@Models/peerCounsellor.model";
-import {DataBaseConnection} from "../Lib/db/connection";
+import { DataBaseConnection } from "../Lib/db/connection";
+import { NumberLiteralType } from "typescript";
 
 const knexConn = new DataBaseConnection().getConnection();
-export interface CounsellorData extends IUser, ICounsellor {}
+export interface CounsellorData extends IUser, ICounsellor {
+  rating: number;
+  counsellorId?:number;
+}
 export interface PeerCounsellorData extends IUser, IPeerCounsellor, IStudent {}
 export type IAnalytics = {
   analytics: {
@@ -39,6 +43,10 @@ export interface IUserRepository {
   addStudentDetails(data: IStudent): Promise<boolean>;
   addCounsellor(data: ICounsellor): Promise<boolean>;
   addPeerCounsellor(data: IPeerCounsellor): Promise<boolean>;
+  rateCounsellor(
+    id: string,
+    rating: number
+  ): Promise<{ currentRating: number }>;
   updateCounselorOrPeerCounsellor(
     data: {
       expertise: string;
@@ -51,17 +59,57 @@ export interface IUserRepository {
     id: string,
     isPeer: boolean
   ): Promise<boolean>;
-  getCounsellors(): Promise<Array<CounsellorData>>;
+  getCounsellors(universityId: string): Promise<Array<CounsellorData>>;
   getCounsellor(id: string): Promise<CounsellorData>;
   getPeerCounsellor(id: string): Promise<PeerCounsellorData>;
-  getPeerCounsellors(): Promise<Array<PeerCounsellorData>>;
+  getPeerCounsellors(universityId: string): Promise<Array<PeerCounsellorData>>;
   fetchUserMetrics(): Promise<IAnalytics>;
-  updateCounsellorSchedule(schedule:Array<ISchedule>,counsellorId:string):Promise<boolean>
+  updateCounsellorSchedule(
+    schedule: Array<ISchedule>,
+    counsellorId: string
+  ): Promise<boolean>;
 }
 export default class UserRepository implements IUserRepository {
- 
-  async getCounsellors(): Promise<CounsellorData[]> {
+  async rateCounsellor(
+    id: string,
+    rating: number
+  ): Promise<{ currentRating: number }> {
+    const { total_No_user_rated: noUserRated, total_rating: prevRating } =
+      await this.getCounsellor(id);
+    const finalUsers =
+      Number.isInteger(noUserRated) && noUserRated !== undefined
+        ? noUserRated + 1
+        : 1;
+    const finalRating =
+      Number.isInteger(prevRating) && prevRating !== undefined
+        ? prevRating + rating
+        : rating;
+        const [counsellor] = await knexConn<CounsellorData>(TableNames.Counselor)
+        .where("_id", "=", id)
+        .update(
+          {
+            total_rating:finalRating,
+            total_No_user_rated: finalUsers,
+          },
+          ["total_rating", "total_No_user_rated"]
+          );
+         
+    const currentRating = this.counsellorStarRating(counsellor);
+    return {
+      currentRating,
+    };
+  }
+  private counsellorStarRating(counsellor: CounsellorData) {
+    if (counsellor.total_rating && counsellor.total_No_user_rated) {
+      return counsellor?.total_rating / counsellor.total_No_user_rated;
+    } else {
+      return 0;
+    }
+  }
+
+  async getCounsellors(universityId: string): Promise<CounsellorData[]> {
     const result = await this.fetchCounsellor()
+      .where("University_id", "=", universityId)
       .from(TableNames.User)
       .join(TableNames.Counselor, function () {
         this.on(
@@ -71,8 +119,33 @@ export default class UserRepository implements IUserRepository {
         );
       });
 
-    return result;
+    return result.map((counsellor) => this.CounsellorReturnPayload(counsellor));
   }
+  private CounsellorReturnPayload(result: CounsellorData): CounsellorData {
+    const rating = this.counsellorStarRating(result);
+    return {
+      _id: result._id,
+      name: result.name,
+      email: result.email,
+      profilePic: result.profilePic,
+      password: result.password,
+      gender: result.gender,
+      phone: result.phone,
+      status: result.status,
+      account_status: result.account_status,
+      dob: result.dob,
+      joined: result.joined,
+      synced: result.synced,
+      counsellorId:result.counsellorId,
+      University_id: result.University_id,
+      Schedule: result.Schedule,
+      expertise: result.expertise,
+      rating,
+      User_id: result.User_id,
+      Campuses_id: result.Campuses_id,
+    };
+  }
+
   fetchCounsellor() {
     return knexConn<CounsellorData>(TableNames.Counselor).select(
       `${TableNames.User}._id`,
@@ -86,8 +159,12 @@ export default class UserRepository implements IUserRepository {
       `${TableNames.User}.account_status`,
       `${TableNames.User}.synced`,
       `${TableNames.User}.joined`,
+      `${TableNames.Counselor}._id as counsellorId`,
       `${TableNames.Counselor}.expertise`,
-      `${TableNames.Counselor}.Campuses_id`
+      `${TableNames.Counselor}.Campuses_id`,
+      `${TableNames.Counselor}.Schedule`,
+      `${TableNames.Counselor}.total_rating`,
+      `${TableNames.Counselor}.total_No_user_rated`
     );
   }
   async getCounsellor(id: string): Promise<CounsellorData> {
@@ -103,10 +180,13 @@ export default class UserRepository implements IUserRepository {
       })
       .first();
 
-    return result;
+    return this.CounsellorReturnPayload(result);
   }
-  async getPeerCounsellors(): Promise<PeerCounsellorData[]> {
+  async getPeerCounsellors(
+    universityId: string
+  ): Promise<PeerCounsellorData[]> {
     const result = await this.fetchPeerCounsellor()
+      .where("University_id", "=", universityId)
       .from(TableNames.User)
       .join(TableNames.peerCounselor, function () {
         this.on(
@@ -138,6 +218,8 @@ export default class UserRepository implements IUserRepository {
       `${TableNames.User}.synced`,
       `${TableNames.User}.joined`,
       `${TableNames.Student}.regNo`,
+      `${TableNames.Student}._id as student_id`,
+      `${TableNames.peerCounselor}._id as peer_counsellorId`,
       `${TableNames.peerCounselor}.expertise`,
       `${TableNames.Student}.Campuses_id`
     );
@@ -232,6 +314,7 @@ export default class UserRepository implements IUserRepository {
     "dob",
     "joined",
     "synced",
+    "University_id",
   ];
   private userPayload(result: IUser[]): IUser | PromiseLike<IUser> {
     const [payload] = result;
@@ -250,6 +333,7 @@ export default class UserRepository implements IUserRepository {
       dob: payload.dob,
       joined: payload.joined,
       synced: payload.synced,
+      University_id: payload.University_id.toString(),
     };
   }
   public insert = async (data: IUser): Promise<IUser> => {
@@ -269,13 +353,17 @@ export default class UserRepository implements IUserRepository {
       .update(data, this.returnData);
     return this.userPayload(result);
   }
-  async updateCounsellorSchedule(schedule: Array<ISchedule>, counsellorId: string): Promise<boolean> {
+  async updateCounsellorSchedule(
+    schedule: Array<ISchedule>,
+    counsellorId: string
+  ): Promise<boolean> {
     const result = await knexConn(TableNames.Counselor)
-      .where('User_id', "=", counsellorId)
-      .update({Schedule: JSON.stringify(schedule)},'User_id');
-      return result ? true : false;
-  } 
- 
+      .where("User_id", "=", counsellorId)
+      .update({ Schedule: JSON.stringify(schedule) }, ["User_id", "Schedule"]);
+
+    return result ? true : false;
+  }
+
   public async find(data: {
     field: string;
     value: string;
@@ -283,13 +371,13 @@ export default class UserRepository implements IUserRepository {
     const result = await knexConn<IUser>(TableNames.User)
       .select("*")
       .where(data.field, "=", data.value);
-    return this.userPayload(result);
+    return result.length > 0 ? this.userPayload(result) : undefined;
   }
   public async findById(id: string): Promise<IUser | undefined> {
     const user = await knexConn<IUser>(TableNames.User)
       .select("*")
       .where("_id", "=", id);
-    return this.userPayload(user);
+    return user.length > 0 ? this.userPayload(user) : undefined;
   }
   public async Delete(id: string): Promise<IUser> {
     const deletedUser = await knexConn<IUser>(TableNames.User)
@@ -310,14 +398,12 @@ export default class UserRepository implements IUserRepository {
     return result ? true : false;
   }
   async addCounsellor(data: ICounsellor): Promise<boolean> {
-    const result = await knexConn(TableNames.Counselor).insert(
-      {
-        User_id:data.User_id,
-        Campuses_id:data.Campuses_id,
-        expertise:data.expertise,
-        Schedule:JSON.stringify(data.Schedule)
-      }
-    );
+    const result = await knexConn(TableNames.Counselor).insert({
+      User_id: data.User_id,
+      Campuses_id: data.Campuses_id,
+      expertise: data.expertise,
+      Schedule: JSON.stringify(data.Schedule),
+    });
     return result ? true : false;
   }
   async addPeerCounsellor(data: IPeerCounsellor): Promise<boolean> {

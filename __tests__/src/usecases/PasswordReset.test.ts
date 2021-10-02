@@ -40,6 +40,7 @@ class Bcrypt {
         account_status: "active",
         synced: "true",
         joined: "12/01/1234",
+        University_id:'1'
       };
     const userCredentials = {
       newPassword: "testPass",

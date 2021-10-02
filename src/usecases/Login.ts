@@ -69,7 +69,7 @@ export class LogIn {
 
       // create and assign an authentification token
       const token = this.jwt.sign(
-        { _id: user._id },
+        { _id: user._id ,uId:user.University_id},
         process.env.SECREATE_TOKEN
       );
 

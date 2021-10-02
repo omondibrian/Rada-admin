@@ -25,26 +25,24 @@ describe("UserRepository", () => {
     account_status: "active",
     synced: "true",
     joined: "12/01/1234",
+    University_id: "1",
   };
   let userId = 0;
-
+  let universityId = "1";
   const updatedData: { [key: string]: any } = {
     name: "Updatedtest",
-
+    University_id: "1",
     email: "newtestUser@test.com",
     phone: "13011998",
     joined: "12/01/1234",
     password: "test",
     status: "online",
     account_status: "active",
-
     profilePic: "./updatedPicture.jpg",
     dob: "31-12-2024",
     synced: "true",
     gender: "male",
   };
-
-
 
   afterAll(async () => {
     await User.query().delete().where("name", "=", updatedData.name);
@@ -132,6 +130,8 @@ describe("UserRepository", () => {
         Campuses_id: 1,
         expertise: "TestExpertise",
         User_id: userId,
+        total_No_user_rated: 1,
+        total_rating: 10,
         Schedule: [
           {
             day: "MON",
@@ -197,6 +197,8 @@ describe("UserRepository", () => {
       expertise: "HIV/AIDS",
       User_id: userId,
       Campuses_id: 1,
+      total_No_user_rated: 1,
+      total_rating: 10,
       Schedule: [
         {
           day: "MON",
@@ -234,14 +236,14 @@ describe("UserRepository", () => {
 
   describe("UserRepository - GetCounsellors", () => {
     it("Should successfully retrive the available counsellors", async () => {
-      const result = await repository.getCounsellors();
+      const result = await repository.getCounsellors(universityId);
       expect(result.length).toBeGreaterThanOrEqual(0);
     });
   });
 
   describe("UserRepository - GetPeerCounsellors", () => {
     it("Should successfully retrive the available PeerCounsellors", async () => {
-      const result = await repository.getPeerCounsellors();
+      const result = await repository.getPeerCounsellors(universityId);
       expect(result.length).toBeGreaterThanOrEqual(0);
     });
   });
@@ -251,6 +253,17 @@ describe("UserRepository", () => {
       const [counselor] = await getCounsellor(conn, userId);
       const result = await repository.getCounsellor(counselor._id);
       expect(result).toBeTruthy();
+    });
+  });
+
+  describe("UserRepository - rateCounsellor", () => {
+    it("Should successfully add counsellor rating", async () => {
+      const [counselor] = await getCounsellor(conn, userId);
+      const result = await repository.rateCounsellor(
+        counselor._id.toString(),
+        5
+      );
+      expect(result.currentRating).toBe(5);
     });
   });
 
@@ -282,14 +295,14 @@ describe("UserRepository", () => {
   });
 
   describe("UserRepository - deleteCounselorOrPeerCounsellor", () => {
-    it("should successfully remove the specified  counselor", async () => {
-      const [counselor] = await getCounsellor(conn, userId);
-      const result = await repository.deleteCounselorOrPeerCounsellor(
-        counselor._id,
-        false
-      );
-      expect(result).toBeTruthy();
-    });
+  it("should successfully remove the specified  counselor", async () => {
+    const [counselor] = await getCounsellor(conn, userId);
+    const result = await repository.deleteCounselorOrPeerCounsellor(
+      counselor._id,
+      false
+    );
+    expect(result).toBeTruthy();
+  });
     it("should successfully remove the specified peercounselor", async () => {
       const [peerCounselor] = await conn<IPeerCounsellor>(
         TableNames.peerCounselor

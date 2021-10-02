@@ -11,6 +11,9 @@ import {
 } from "@Rada/src/Repositories/User.repository";
 
 export class UserMockRepository implements IUserRepository {
+  rateCounsellor(id: string, rating: number): Promise<{ currentRating: number; }> {
+    throw new Error("Method not implemented.");
+  }
   insert(data: IUser): Promise<IUser> {
     throw new Error("Method not implemented.");
   }

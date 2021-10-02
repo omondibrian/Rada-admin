@@ -6,11 +6,11 @@ export class GetCounsellors {
     private readonly repo: IUserRepository,
     private readonly config: any
   ) {}
-  async fetch(): Promise<
+  async fetch(id:string): Promise<
     ResultPayload<Array<CounsellorData>> | ResultPayload<Error> | undefined
   > {
     try {
-      const result = await this.repo.getCounsellors();
+      const result = await this.repo.getCounsellors(id);
       return new ResultPayload<Array<CounsellorData>>(result, 200);
     } catch (error: any) {
       const msg =

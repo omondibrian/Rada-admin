@@ -26,7 +26,7 @@ export default class User extends Model {
   public account_status!: string;
   public synced!: string;
   public joined!: string;
-
+  public University_id!: string;
 
   static get tableName(): string {
     return TableNames.User;
@@ -71,4 +71,5 @@ export interface IUser {
   account_status: string;
   synced: string;
   joined: string;
+  University_id:string
 }

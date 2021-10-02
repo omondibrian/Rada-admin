@@ -1,10 +1,10 @@
-
 import Joi from "joi";
 import { IUser } from "@Rada/src/models/User.model";
 import { ResultPayload } from "@Rada/src/Lib/utils/result";
 import { Registration } from "@Rada/src/usecases/Registration";
 import { UserMockRepository } from "@Rada/__mocks__/UserRepository";
 import AuthServiceUtilities from "@Rada/src/Lib/utils/authServiceUtilities";
+import { UniversityServiceProvider } from "@Rada/src/service/University.service";
 
 class Bcrypt {
   // eslint-disable-next-line @typescript-eslint/no-empty-function
@@ -29,17 +29,17 @@ describe("Registeruser - Usecase", () => {
   const testUtilities = new AuthServiceUtilities();
   const jwt = { sign: () => {} };
   const config = jest.fn().mockReturnValue({ env: "development" });
-
+  const universityService = new UniversityServiceProvider();
   const bcrypt = new Bcrypt();
   const usecase = new Registration(
     testRepo,
     testUtilities,
-    jwt,
+    universityService,
     bcrypt,
     config
   );
 
-  const userToRegister:IUser = {
+  const userToRegister: IUser = {
     name: "testUser",
     email: "testUser1@test.com",
     password: "test",
@@ -51,7 +51,9 @@ describe("Registeruser - Usecase", () => {
     account_status: "active",
     synced: "true",
     joined: "12/01/1234",
+    University_id: "1",
   };
+
   it("should successfully register new user", async () => {
     // setup mocks
     const mockregistrationValidation = jest.spyOn(
@@ -71,7 +73,14 @@ describe("Registeruser - Usecase", () => {
       .spyOn(testRepo, "insert")
       .mockResolvedValue(userToRegister as IUser);
     jest.spyOn(bcrypt, "hash");
-
+    const mockUniService = jest
+      .spyOn(universityService.fetchUniversity, "fetch")
+      .mockResolvedValue(
+        new ResultPayload<{ name: string; _id: string }>(
+          { name: "Test University", _id: "1" },
+          200
+        )
+      );
     const result = await usecase.registeruser(userToRegister);
     expect(testUtilities.registrationValidation).toHaveBeenCalledWith(
       userToRegister
@@ -79,19 +88,22 @@ describe("Registeruser - Usecase", () => {
 
     expect(testRepo.find).toHaveBeenCalledTimes(1);
     expect(testRepo.insert).toHaveBeenCalledTimes(1);
+    expect(universityService.fetchUniversity.fetch).toHaveBeenCalledTimes(1);
     expect(bcrypt.hash).toHaveBeenCalledTimes(1);
 
     expect(result).toStrictEqual<ResultPayload<{ message: string }>>(
       new ResultPayload(
         {
-          message: "registration sucessfull please check your email",
+          message: "registration sucessfull ",
         },
         200
       )
     );
+    mockUniService.mockClear()
     mockFindUser.mockClear();
     mockInsert.mockClear();
   });
+  
   it("should return error message if existing email is used", async () => {
     jest.spyOn(testRepo, "find").mockResolvedValue(userToRegister as IUser);
 
@@ -109,10 +121,9 @@ describe("Registeruser - Usecase", () => {
   });
 
   it("should return error message if user is undefined", async () => {
-
     const mockFindUser = jest
-    .spyOn(testRepo, "find")
-    .mockReturnValue(Promise.resolve(undefined));
+      .spyOn(testRepo, "find")
+      .mockReturnValue(Promise.resolve(undefined));
     jest
       .spyOn(testRepo, "insert")
       .mockResolvedValue(undefined as unknown as IUser);
@@ -126,7 +137,9 @@ describe("Registeruser - Usecase", () => {
     const result = (await usecase.registeruser(
       userToRegister
     )) as ResultPayload<Error>;
-    expect(result.getError()?.message).toEqual("cannot send mail to user of undefined");
+    expect(result.getError()?.message).toEqual(
+      "cannot send mail to user of undefined"
+    );
     mockValidation.mockClear();
     mockFindUser.mockClear();
   });

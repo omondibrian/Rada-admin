@@ -42,6 +42,7 @@ export class PasswordReset {
         account_status: user.account_status,
         synced: user.synced,
         joined: user.joined,
+        University_id:user.University_id
       };
       const result = await this.repo.update(
         { field: "email", value: credentials.email },

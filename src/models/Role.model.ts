@@ -38,7 +38,7 @@ export default class Role extends Model   {
   };
 
   export interface IRole  {
-    _id: number;
+    _id?: number;
     name: string;
    
   }
